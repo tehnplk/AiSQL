@@ -1,0 +1,6 @@
+HOST=203.157.118.95
+PORT=2951
+USER=readonly_user
+PASSWORD=readonly_user
+DATABASE=hos2
+

@@ -8,9 +8,11 @@ import asyncio
 import os
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import logfire
+
 logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
 
 local_model = OpenAIModel(
@@ -23,7 +25,10 @@ cloud_model = OpenAIModel(
     provider=OpenRouterProvider(api_key=os.getenv("OPENROUTER_API_KEY")),
 )
 
-custom_model = 'google-gla:gemini-2.5-flash'
+custom_model = "google-gla:gemini-2.5-flash"
+
+from sandbox import read_db_config
+
 
 class AgentData:
     class OutputType(BaseModel):
@@ -35,16 +40,12 @@ class AgentData:
             description="The explanation of the result or result value not in tabular or markdown format , Limit in 200 words."
         )
 
+    # Read database configuration from sandbox.txt
+
     mcp_mysql = MCPServerStdio(
         "uvx",
         ["--from", "mysql-mcp-server", "mysql_mcp_server"],
-        {
-            "MYSQL_HOST": os.getenv("MYSQL_HOST"),
-            "MYSQL_PORT": os.getenv("MYSQL_PORT"),
-            "MYSQL_USER": os.getenv("MYSQL_USER"),
-            "MYSQL_PASSWORD": os.getenv("MYSQL_PASSWORD"),
-            "MYSQL_DATABASE": os.getenv("MYSQL_DATABASE"),
-        },
+        read_db_config(),
     )
 
     def __init__(self, model=custom_model):
@@ -65,9 +66,7 @@ class AgentData:
 
 class AgentChart:
     class OutputType(BaseModel):
-        chart: str = Field(
-            description="The chart url in markdown format"
-        )
+        chart: str = Field(description="The chart url in markdown format")
         explanation: str = Field(description="The conclusion of the chart")
 
     mcp_chart = MCPServerStdio("npx", ["-y", "@antv/mcp-server-chart"])
@@ -83,9 +82,11 @@ class AgentChart:
             output_type=self.OutputType,
         )
 
-    async def run(self, query: str, data: str,message_history=[]):
+    async def run(self, query: str, data: str, message_history=[]):
         async with self.agent.run_mcp_servers():
-            result = await self.agent.run(f"{query} \n\n {data}",message_history=message_history)
+            result = await self.agent.run(
+                f"{query} \n\n {data}", message_history=message_history
+            )
         return result
 
 
