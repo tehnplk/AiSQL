@@ -85,7 +85,6 @@ class main(QMainWindow, main_ui):
         try:
             query = self.sql_editor.toPlainText().strip()
             if not query:
-                self.status_label.setText("No query to run")
                 print("No query to run")
                 return
 
@@ -136,7 +135,6 @@ class main(QMainWindow, main_ui):
             # Disable run button and show progress
             self.run_button.setEnabled(False)
             self.run_button.setText("Processing...")
-            self.status_label.setText("Preparing to execute query...")
 
             # Clear previous results
             self.results_area.setModel(None)
@@ -163,7 +161,6 @@ class main(QMainWindow, main_ui):
 
     def on_progress_update(self, message):
         """Update progress display."""
-        self.status_label.setText(message)
         print(f"Progress: {message}")
 
     def on_query_finished(self, results, columns):
@@ -207,7 +204,6 @@ class main(QMainWindow, main_ui):
         self.results_area.resizeColumnsToContents()
 
         # Update status
-        self.status_label.setText(f"Found {len(results)} records")
         self.results_data = results
         self.columns_data = columns
 
@@ -220,7 +216,6 @@ class main(QMainWindow, main_ui):
         self.run_button.setEnabled(True)
         self.run_button.setText("Run Query")
 
-        self.status_label.setText("Error occurred during processing")
         print(f"ERROR: {error_message}")
 
         # Show error in a message box
@@ -426,7 +421,6 @@ class main(QMainWindow, main_ui):
         self.chat_text.clear()
         model = QStandardItemModel()
         self.results_area.setModel(model)
-        self.status_label.setText("Editor cleared")
 
         # Clear data and disable export
         self.results_data = []

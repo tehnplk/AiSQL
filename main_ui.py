@@ -182,6 +182,21 @@ class main_ui(object):
         self.format_button = QPushButton("Format SQL")
         
         self.export_button = QPushButton("📤 Export to Excel")
+        
+        self.model_button = QPushButton("🤖 Model: gemini-2.5-flash")
+        self.model_button.setStyleSheet("""
+            QPushButton {
+                background-color: #6c757d;
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #5a6268;
+            }
+        """)
         self.export_button.setStyleSheet("""
             QPushButton {
                 background-color: #28a745;
@@ -201,16 +216,12 @@ class main_ui(object):
         """)
         self.export_button.setEnabled(False)  # Initially disabled
         
-        toolbar_layout.addWidget(self.run_button)
+        toolbar_layout.addWidget(self.export_button)        
         toolbar_layout.addWidget(self.clear_button)
         toolbar_layout.addWidget(self.format_button)
-        toolbar_layout.addWidget(self.export_button)
+        toolbar_layout.addWidget(self.run_button)
         toolbar_layout.addStretch()
-        
-        # Status label
-        self.status_label = QLabel("Ready")
-        self.status_label.setStyleSheet("color: #666; padding: 5px;")
-        toolbar_layout.addWidget(self.status_label)
+        toolbar_layout.addWidget(self.model_button)
         
         layout.addLayout(toolbar_layout)
         
@@ -238,7 +249,7 @@ class main_ui(object):
         """)
         
         # Add chat button
-        self.chat_button = QPushButton("🤖 Chat")
+        self.chat_button = QPushButton("Chat")
         self.chat_button.setMaximumHeight(60)  # Same height as chat_text
         self.chat_button.setFixedWidth(120)  # Set fixed width to 120px
         self.chat_button.setStyleSheet("""
@@ -298,6 +309,17 @@ class main_ui(object):
         # Initialize empty model
         self.results_model = QStandardItemModel()
         self.results_area.setModel(self.results_model)
+        
+        # Add status bar
+        self.statusbar = self.statusBar()
+        self.statusbar.setStyleSheet("""
+            QStatusBar {
+                background-color: #2d2d30;
+                color: #ffffff;
+                border-top: 1px solid #3e3e42;
+            }
+        """)
+        self.statusbar.showMessage("Ready")
         
         # Set splitter stretch factors and initial sizes
         splitter.setStretchFactor(0, 3)  # Editor gets 3/4 of the space
