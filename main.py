@@ -445,10 +445,8 @@ class main(QMainWindow, main_ui):
                 use_space_around_operators=True,
             )
             self.sql_editor.setPlainText(formatted)
-            self.status_label.setText("SQL formatted")
         except Exception as e:
             # Fallback to simple formatting if MySQLFormatter fails
-            self.status_label.setText(f"Formatting error: {str(e)}")
             formatted = query
             formatted = re.sub(
                 r"\bSELECT\b", "\nSELECT", formatted, flags=re.IGNORECASE
@@ -518,9 +516,6 @@ class main(QMainWindow, main_ui):
 
         # Format the SQL
         self.format_sql()
-
-        # Update status
-        self.status_label.setText("Chat query processed successfully")
 
     def on_chat_error(self, error_message):
         """Handle chat error."""
