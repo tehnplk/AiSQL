@@ -148,7 +148,7 @@ class SQLTextEdit(QTextEdit):
 
 class main_ui(object):
     def setupUi(self,main_ui):
-        self.setWindowTitle("SQL Editor with Syntax Highlighting")
+        self.setWindowTitle("AiSQL")
         self.setGeometry(100, 100, 1000, 700)
         
         # Create central widget
@@ -162,7 +162,7 @@ class main_ui(object):
         toolbar_layout = QHBoxLayout()
         
         # Buttons
-        self.run_button = QPushButton("Run Query")
+        self.run_button = QPushButton("▶️ Run Query")
         self.run_button.setStyleSheet("""
             QPushButton {
                 background-color: #0078d4;
@@ -181,7 +181,7 @@ class main_ui(object):
         
         self.format_button = QPushButton("Format SQL")
         
-        self.export_button = QPushButton("Export to Excel")
+        self.export_button = QPushButton("📤 Export to Excel")
         self.export_button.setStyleSheet("""
             QPushButton {
                 background-color: #28a745;
@@ -238,12 +238,12 @@ class main_ui(object):
         """)
         
         # Add chat button
-        self.chat_button = QPushButton("Chat")
+        self.chat_button = QPushButton("🤖 Chat")
         self.chat_button.setMaximumHeight(60)  # Same height as chat_text
         self.chat_button.setFixedWidth(120)  # Set fixed width to 120px
         self.chat_button.setStyleSheet("""
             QPushButton {
-                background-color: #0078d4;
+                background-color: #28a745;  /* Green color */
                 color: white;
                 border: none;
                 border-radius: 4px;
@@ -251,10 +251,10 @@ class main_ui(object):
                 font-weight: bold;
             }
             QPushButton:hover {
-                background-color: #106ebe;
+                background-color: #218838;  /* Darker green on hover */
             }
             QPushButton:pressed {
-                background-color: #005a9e;
+                background-color: #1e7e34;  /* Even darker green when pressed */
             }
         """)
         
@@ -276,17 +276,18 @@ class main_ui(object):
         self.results_area.setMinimumHeight(100)  # Minimum height when collapsed
         self.results_area.setStyleSheet("""
             QTableView {
-                background-color: #252526;
-                color: #d4d4d4;
-                border: 1px solid #3c3c3c;
-                gridline-color: #3c3c3c;
+                background-color: white;
+                color: black;
+                border: 1px solid #cccccc;
+                gridline-color: #e0e0e0;
                 font-family: 'Consolas', monospace;
             }
             QHeaderView::section {
-                background-color: #2d2d2d;
-                color: #d4d4d4;
+                background-color: #f0f0f0;
+                color: black;
                 padding: 4px;
-                border: 1px solid #3c3c3c;
+                border: 1px solid #cccccc;
+                font-weight: bold;
             }
         """)
         

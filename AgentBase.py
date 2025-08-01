@@ -23,7 +23,7 @@ cloud_model = OpenAIModel(
     provider=OpenRouterProvider(api_key=os.getenv("OPENROUTER_API_KEY")),
 )
 
-custom_model = 'google-gla:gemini-2.0-flash'
+custom_model = 'google-gla:gemini-2.5-flash'
 
 class AgentData:
     class OutputType(BaseModel):
