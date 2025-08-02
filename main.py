@@ -47,7 +47,11 @@ from QueryExecutor import QueryExecutor
 
 from PandasTableModel import PandasTableModel
 
-
+from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.openrouter import OpenRouterProvider
+from pydantic_ai.providers.openai import OpenAIProvider
+import traceback
+import os
 class main(QMainWindow, main_ui):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -79,6 +83,86 @@ class main(QMainWindow, main_ui):
         # Connect run action from Query menu
         if hasattr(self, "run_action"):
             self.run_action.triggered.connect(self.run_query)
+
+        # model llm
+        self.local_model = OpenAIModel(
+            model_name="aliafshar/gemma3-it-qat-tools:1b",
+            provider=OpenAIProvider(base_url="http://localhost:11434/v1"),
+        )
+
+        self.cloud_model = OpenAIModel(
+            model_name="openrouter/horizon-beta",
+            provider=OpenRouterProvider(api_key=os.getenv("OPENROUTER_API_KEY")),
+        )
+
+        self.custom_model = "google-gla:gemini-2.5-flash"
+        self.model_llm = self.cloud_model
+
+    def btn_chat(self):
+        """Execute chat query using background thread."""
+        try:
+            user_prompt = self.chat_text.toPlainText().strip()
+            if not user_prompt:
+                return
+
+            # Clear SQL editor
+            self.sql_editor.setPlainText("")
+
+            # Disable chat button during processing
+            if hasattr(self, "chat_button"):
+                self.chat_button.setEnabled(False)
+                self.chat_button.setText("Thinking...")
+
+            # Start background chat execution
+            self.chat_executor = ChatExecutor(
+                self.model_llm, user_prompt, self.message_history
+            )
+            self.chat_executor.signal_finished.connect(self.on_chat_finished)
+            self.chat_executor.signal_error.connect(self.on_chat_error)
+            self.chat_executor.signal_progress.connect(self.on_progress_update)
+            self.chat_executor.signal_message_history.connect(self.on_message_history)
+            self.chat_executor.start()
+
+        except Exception as e:
+            # Catch-all exception handler
+            error_msg = f"Unexpected error: {str(e)}"
+            print(f"DEBUG: {error_msg}")
+            traceback.print_exc()
+
+            # Restore button state
+            if hasattr(self, "chat_button"):
+                self.chat_button.setEnabled(True)
+                self.chat_button.setText("Chat")
+
+    def on_message_history(self, message_history):
+        """Handle message history update."""
+        self.message_history = message_history
+
+    def on_chat_finished(self, sql_result):
+        """Handle successful chat completion."""
+        # Restore button state
+        if hasattr(self, "chat_button"):
+            self.chat_button.setEnabled(True)
+            self.chat_button.setText("Chat")
+
+        # Set SQL result in editor
+        self.sql_editor.setPlainText(sql_result)
+
+        # Format the SQL
+        self.format_sql()
+
+    def on_chat_error(self, error_message):
+        """Handle chat error."""
+        # Restore button state
+        if hasattr(self, "chat_button"):
+            self.chat_button.setEnabled(True)
+            self.chat_button.setText("Chat")
+
+        self.statusbar.showMessage("Error occurred during chat processing")
+        print(f"ERROR: {error_message}")
+
+        # Show error in a message box
+        QMessageBox.critical(self, "Error", error_message)
 
     def run_query(self):
         """Execute SQL query using background thread and pandas model."""
@@ -174,7 +258,7 @@ class main(QMainWindow, main_ui):
         print(f"Rows returned: {len(results)}")
 
         if not results:
-            self.status_label.setText("No data found")
+            self.statusbar.showMessage("No data found")
             # Show no data message
             model = QStandardItemModel(1, 1)
             model.setHorizontalHeaderLabels(["Result"])
@@ -308,15 +392,15 @@ class main(QMainWindow, main_ui):
             total_count = len(self.pandas_model._original_dataframe)
 
             if filtered_count == total_count:
-                self.status_label.setText(f"Found {total_count} records")
+                self.statusbar.showMessage(f"Found {total_count} records")
             else:
-                self.status_label.setText(
+                self.statusbar.showMessage(
                     f"Showing {filtered_count} of {total_count} records (filtered)"
                 )
 
     def _show_error(self, error_message):
         """Helper method to display error messages in the results area"""
-        self.status_label.setText(error_message)
+        self.statusbar.showMessage(error_message)
         model = QStandardItemModel()
         model.setHorizontalHeaderLabels(["Error"])
         model.appendRow([QStandardItem(error_message)])
@@ -461,74 +545,6 @@ class main(QMainWindow, main_ui):
             )
             formatted = re.sub(r";\s*$", ";\n", formatted, flags=re.MULTILINE)
             self.sql_editor.setPlainText(formatted)
-
-    def btn_chat(self):
-        """Execute chat query using background thread."""
-        try:
-            user_prompt = self.chat_text.toPlainText().strip()
-            if not user_prompt:
-                self.status_label.setText("No prompt to process")
-                return
-
-            # Clear SQL editor
-            self.sql_editor.setPlainText("")
-
-            # Disable chat button during processing
-            if hasattr(self, "chat_button"):
-                self.chat_button.setEnabled(False)
-                self.chat_button.setText("Thinking...")
-
-            # Start background chat execution
-            self.chat_executor = ChatExecutor(user_prompt, self.message_history)
-            self.chat_executor.signal_finished.connect(self.on_chat_finished)
-            self.chat_executor.signal_error.connect(self.on_chat_error)
-            self.chat_executor.signal_progress.connect(self.on_progress_update)
-            self.chat_executor.signal_message_history.connect(self.on_message_history)
-            self.chat_executor.start()
-
-        except Exception as e:
-            # Catch-all exception handler
-            error_msg = f"Unexpected error: {str(e)}"
-            self.status_label.setText(error_msg)
-            print(f"DEBUG: {error_msg}")
-            import traceback
-
-            traceback.print_exc()
-
-            # Restore button state
-            if hasattr(self, "chat_button"):
-                self.chat_button.setEnabled(True)
-                self.chat_button.setText("Chat")
-
-    def on_message_history(self, message_history):
-        """Handle message history update."""
-        self.message_history = message_history
-
-    def on_chat_finished(self, sql_result):
-        """Handle successful chat completion."""
-        # Restore button state
-        if hasattr(self, "chat_button"):
-            self.chat_button.setEnabled(True)
-            self.chat_button.setText("Chat")
-
-        # Set SQL result in editor
-        self.sql_editor.setPlainText(sql_result)
-
-        # Format the SQL
-        self.format_sql()
-
-    def on_chat_error(self, error_message):
-        """Handle chat error."""
-        # Restore button state
-        if hasattr(self, "chat_button"):
-            self.chat_button.setEnabled(True)
-            self.chat_button.setText("Chat")
-
-        self.status_label.setText("Error occurred during chat processing")
-        print(f"ERROR: {error_message}")
-
-        # Show error in a message box
-        QMessageBox.critical(self, "Error", error_message)
 
     def show_settings(self):
         """Show the database settings dialog."""

@@ -1,9 +1,6 @@
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStdio, MCPServerSSE
 from pydantic import BaseModel, Field
-from pydantic_ai.models.openai import OpenAIModel
-from pydantic_ai.providers.openrouter import OpenRouterProvider
-from pydantic_ai.providers.openai import OpenAIProvider
 import asyncio
 import os
 
@@ -15,17 +12,6 @@ import logfire
 
 logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
 
-local_model = OpenAIModel(
-    model_name="aliafshar/gemma3-it-qat-tools:1b",
-    provider=OpenAIProvider(base_url="http://localhost:11434/v1"),
-)
-
-cloud_model = OpenAIModel(
-    model_name="openrouter/horizon-alpha",
-    provider=OpenRouterProvider(api_key=os.getenv("OPENROUTER_API_KEY")),
-)
-
-custom_model = "google-gla:gemini-2.5-flash"
 
 from sandbox import read_db_config
 
@@ -48,7 +34,7 @@ class AgentData:
         read_db_config(),
     )
 
-    def __init__(self, model=custom_model):
+    def __init__(self, model=None):
         self.agent = Agent(
             model=model,
             system_prompt=open("sys_prompt2.txt", "r", encoding="utf-8").read(),
@@ -72,7 +58,7 @@ class AgentChart:
     mcp_chart = MCPServerStdio("npx", ["-y", "@antv/mcp-server-chart"])
     # mcp_chart = MCPServerStdio("npx", ["-y", "@gongrzhe/quickchart-mcp-server"])
 
-    def __init__(self, model=cloud_model):
+    def __init__(self, model=None):
         self.agent = Agent(
             model=model,
             system_prompt="สร้างแผนภูมิจากข้อมูล CSV ที่ได้รับ และแสดงผลลัพธ์ที่ได้ในรูปแบบ markdown",
