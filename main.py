@@ -123,7 +123,7 @@ class main(QMainWindow, main_ui):
 
         except Exception as e:
             # Catch-all exception handler
-            error_msg = f"Unexpected error: {str(e)}"
+            error_msg = f"เกิดข้อผิดพลาด: {str(e)}"
             print(f"DEBUG: {error_msg}")
             traceback.print_exc()
 
@@ -156,11 +156,11 @@ class main(QMainWindow, main_ui):
             self.chat_button.setEnabled(True)
             self.chat_button.setText("Chat")
 
-        self.statusbar.showMessage("Error occurred during chat processing")
+        self.statusbar.showMessage("เกิดข้อผิดพลาด: Error occurred during chat processing")
         print(f"ERROR: {error_message}")
 
         # Show error in a message box
-        QMessageBox.critical(self, "Error", error_message)
+        QMessageBox.critical(self, "เกิดข้อผิดพลาด", f"{error_message}\n กรุณาดำเนินการใหม่อีกครั้ง")
 
     def run_query(self):
         """Execute SQL query using background thread and pandas model."""
@@ -187,7 +187,7 @@ class main(QMainWindow, main_ui):
                     f"Database config: {db_config['user']}@{db_config['host']}:{db_config['port']}/{db_config['database']}"
                 )
             except Exception as e:
-                error_msg = f"Settings error: {str(e)}"
+                error_msg = f"เกิดข้อผิดพลาด: {str(e)}"
                 self._show_error(error_msg)
                 print(f"ERROR: {error_msg}")
                 return
@@ -230,7 +230,7 @@ class main(QMainWindow, main_ui):
 
         except Exception as e:
             # Catch-all exception handler to prevent application crash
-            error_msg = f"Unexpected error: {str(e)}"
+            error_msg = f"เกิดข้อผิดพลาด: {str(e)}"
             self._show_error(error_msg)
             print(f"DEBUG: {error_msg}")
             import traceback
@@ -256,11 +256,11 @@ class main(QMainWindow, main_ui):
         print(f"Rows returned: {len(results)}")
 
         if not results:
-            self.statusbar.showMessage("No data found")
+            self.statusbar.showMessage("ไม่พบข้อมูล")
             # Show no data message
             model = QStandardItemModel(1, 1)
             model.setHorizontalHeaderLabels(["Result"])
-            item = QStandardItem("No data found matching the criteria")
+            item = QStandardItem("ไม่พบข้อมูลที่ตรงตามเงื่อนไข")
             item.setEditable(False)
             model.setItem(0, 0, item)
             self.results_area.setModel(model)
