@@ -42,21 +42,9 @@ class AgentData:
 
     def __init__(self, model="gemini-2.5-flash-lite"):
 
-        self.model = None
-
-        model_horizon = OpenAIModel(
-            "openrouter/horizon-beta",
-            provider=OpenRouterProvider(api_key=OPENROUTER_API_KEY),
-        )
-
-        model_gemini = GeminiModel(
+        self.model = GeminiModel(
             model, provider=GoogleGLAProvider(api_key=GEMINI_API_KEY)
         )
-
-        if model == "horizon-beta":
-            self.model = model_horizon
-        else:
-            self.model = model_gemini
 
         self.agent = Agent(
             model=self.model,
@@ -80,23 +68,12 @@ class AgentChart:
     mcp_chart = MCPServerStdio("npx", ["-y", "@antv/mcp-server-chart"])
     # mcp_chart = MCPServerStdio("npx", ["-y", "@gongrzhe/quickchart-mcp-server"])
 
-    def __init__(self, model="horizon-beta"):
+    def __init__(self, model="openrouter/horizon-beta"):
 
-        self.model = None
-
-        model_horizon = OpenAIModel(
-            "openrouter/horizon-beta",
+        self.model = OpenAIModel(
+            model,
             provider=OpenRouterProvider(api_key=OPENROUTER_API_KEY),
         )
-
-        model_gemini = GeminiModel(
-            model, provider=GoogleGLAProvider(api_key=GEMINI_API_KEY)
-        )
-
-        if model == "horizon-beta":
-            self.model = model_horizon
-        else:
-            self.model = model_gemini
 
         self.agent = Agent(
             model=self.model,
@@ -118,13 +95,14 @@ class AgentChart:
 if __name__ == "__main__":
 
     import asyncio
+
     agent_data = AgentData(model="gemini-2.5-flash")
     result_data = asyncio.run(
         agent_data.chat("ใช้ mcp tool execute_sql นับจำนวนประชากรทั้งหมด แยกรายหมู่บ้าน"),
     )
     print(result_data.output)
 
-    agent_chart = AgentChart(model="horizon-beta")
+    agent_chart = AgentChart(model="openrouter/horizon-beta")
     result_chart = asyncio.run(
         agent_chart.chat(
             "แสดงกราฟแท่ง",
