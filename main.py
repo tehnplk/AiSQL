@@ -32,11 +32,12 @@ from PandasTableModel import PandasTableModel
 import traceback
 import os
 
+"""
 import logfire
 from tokenn import LOGFIRE_KEY
 logfire.configure(token=LOGFIRE_KEY)
 logfire.instrument_pydantic_ai()
-
+"""
 
 class main(QMainWindow, main_ui):
     def __init__(self, parent=None):
