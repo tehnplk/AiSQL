@@ -197,8 +197,7 @@ class main_ui(object):
             "gemini-2.0-flash-lite",
             "gemini-2.0-flash",
             "gemini-2.5-flash-lite",
-            "gemini-2.5-flash",
-            "horizon-beta"
+            "gemini-2.5-flash"
         ])
         self.model_combo.setCurrentText("gemini-2.5-flash")
         self.model_combo.setStyleSheet("""

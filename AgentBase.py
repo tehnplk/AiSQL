@@ -40,7 +40,7 @@ class AgentData:
         read_db_config(),
     )
 
-    def __init__(self, model="gemini-2.5-flash-lite"):
+    def __init__(self, model="gemini-2.5-flash"):
 
         self.model = GeminiModel(
             model, provider=GoogleGLAProvider(api_key=GEMINI_API_KEY)
@@ -94,6 +94,8 @@ class AgentChart:
 
 if __name__ == "__main__":
 
+    #test model 
+    
     import asyncio
 
     agent_data = AgentData(model="gemini-2.5-flash")

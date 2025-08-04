@@ -66,13 +66,6 @@ class main(QMainWindow, main_ui):
         # Initialize MySQL formatter
         self.mysql_formatter = MySQLFormatter()
 
-        self.model = [
-            "gemini-2.0-flash-lite",
-            "gemini-2.0-flash",
-            "gemini-2.5-flash-lite",
-            "gemini-2.5-flash",
-            "horizon-beta",
-        ]
 
         # Setup table context menu
         self.setup_table_context_menu()
