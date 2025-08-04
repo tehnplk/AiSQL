@@ -1,7 +1,7 @@
 
 from PyQt6.QtCore import QThread, pyqtSignal
 import asyncio
-from AgentBase import AgentData
+from AgentData import AgentData
 
 class ChatExecutor(QThread):
     """Background thread for executing chat queries."""
