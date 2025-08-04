@@ -1,13 +1,7 @@
 import sys
 import re
 import pandas as pd
-from PyQt6.QtWidgets import (
-    QApplication,
-    QMainWindow,
-    QMessageBox,
-    QFileDialog,
-    QMenu
-)
+from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QMenu
 from PyQt6.QtCore import (
     Qt,
     QSettings,
@@ -29,7 +23,6 @@ from QueryExecutor import QueryExecutor
 
 from PandasTableModel import PandasTableModel
 
-import traceback
 import os
 
 """
@@ -38,6 +31,7 @@ from tokenn import LOGFIRE_KEY
 logfire.configure(token=LOGFIRE_KEY)
 logfire.instrument_pydantic_ai()
 """
+
 
 class main(QMainWindow, main_ui):
     def __init__(self, parent=None):
@@ -54,7 +48,6 @@ class main(QMainWindow, main_ui):
         # Initialize MySQL formatter
         self.mysql_formatter = MySQLFormatter()
 
-
         # Setup table context menu
         self.setup_table_context_menu()
 
@@ -68,13 +61,12 @@ class main(QMainWindow, main_ui):
 
         # Connect menu actions
         self.settings_action.triggered.connect(self.show_settings)
-        if hasattr(self, 'open_action'):
+        if hasattr(self, "open_action"):
             self.open_action.triggered.connect(self.open_sql)
 
         # Connect run action from Query menu
         if hasattr(self, "run_action"):
             self.run_action.triggered.connect(self.run_query)
-
 
     def btn_chat(self):
         """Execute chat query using background thread."""
@@ -98,20 +90,23 @@ class main(QMainWindow, main_ui):
             )
             self.chat_executor.signal_finished.connect(self.on_chat_finished)
             self.chat_executor.signal_error.connect(self.on_chat_error)
-            self.chat_executor.signal_progress.connect(self.on_progress_update)
+            self.chat_executor.signal_progress.connect(self.on_chat_progress_update)
             self.chat_executor.signal_message_history.connect(self.on_message_history)
             self.chat_executor.start()
 
         except Exception as e:
-            # Catch-all exception handler
+            # Catch-all exception handler for TaskGroup and other async errors
             error_msg = f"เกิดข้อผิดพลาด: {str(e)}"
+            self._show_error(error_msg)
             print(f"DEBUG: {error_msg}")
-            traceback.print_exc()
 
             # Restore button state
             if hasattr(self, "chat_button"):
                 self.chat_button.setEnabled(True)
                 self.chat_button.setText("Chat")
+
+    def on_chat_progress_update(self, message):
+        print(f"Progress: {message}")
 
     def on_message_history(self, message_history):
         """Handle message history update."""
@@ -141,7 +136,9 @@ class main(QMainWindow, main_ui):
         print(f"ERROR: {error_message}")
 
         # Show error in a message box
-        QMessageBox.critical(self, "เกิดข้อผิดพลาด", f"{error_message}\n กรุณาดำเนินการใหม่อีกครั้ง")
+        QMessageBox.critical(
+            self, "เกิดข้อผิดพลาด", f"{error_message}\n กรุณาดำเนินการใหม่อีกครั้ง"
+        )
 
     def run_query(self):
         """Execute SQL query using background thread and pandas model."""
@@ -214,17 +211,10 @@ class main(QMainWindow, main_ui):
             error_msg = f"เกิดข้อผิดพลาด: {str(e)}"
             self._show_error(error_msg)
             print(f"DEBUG: {error_msg}")
-            import traceback
-
-            traceback.print_exc()
 
             # Restore button state
             self.run_button.setEnabled(True)
             self.run_button.setText("Run Query")
-
-    def on_progress_update(self, message):
-        """Update progress display."""
-        print(f"Progress: {message}")
 
     def on_query_finished(self, results, columns):
         """Handle successful query completion."""
@@ -535,14 +525,14 @@ class main(QMainWindow, main_ui):
         try:
             # Get the current SQL query
             sql_query = self.sql_editor.toPlainText().strip()
-            
+
             if not sql_query:
                 QMessageBox.warning(self, "Warning", "No SQL query to save")
                 return
 
             # Force save to /sql directory
-            sql_dir = os.path.join(os.getcwd(), 'sql')
-            
+            sql_dir = os.path.join(os.getcwd(), "sql")
+
             # Create sql directory if it doesn't exist
             os.makedirs(sql_dir, exist_ok=True)
 
@@ -558,9 +548,9 @@ class main(QMainWindow, main_ui):
                 # Ensure the file is saved in /sql directory
                 basename = os.path.basename(filename)
                 forced_path = os.path.join(sql_dir, basename)
-                
+
                 # Save to forced /sql directory
-                with open(forced_path, 'w', encoding='utf-8') as file:
+                with open(forced_path, "w", encoding="utf-8") as file:
                     file.write(sql_query)
 
                 QMessageBox.information(
@@ -580,8 +570,8 @@ class main(QMainWindow, main_ui):
         """Open SQL file from /sql directory by default."""
         try:
             # Set default directory to /sql
-            sql_dir = os.path.join(os.getcwd(), 'sql')
-            
+            sql_dir = os.path.join(os.getcwd(), "sql")
+
             # Create sql directory if it doesn't exist
             os.makedirs(sql_dir, exist_ok=True)
 
@@ -595,7 +585,7 @@ class main(QMainWindow, main_ui):
 
             if filename:
                 # Read file content
-                with open(filename, 'r', encoding='utf-8') as file:
+                with open(filename, "r", encoding="utf-8") as file:
                     sql_content = file.read()
 
                 # Load into SQL editor
@@ -631,6 +621,3 @@ if __name__ == "__main__":
 
     except Exception as e:
         print(f"Fatal error: {e}")
-        import traceback
-
-        traceback.print_exc()
