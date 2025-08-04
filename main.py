@@ -1,36 +1,18 @@
 import sys
 import re
-import pymysql
 import pandas as pd
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
-    QVBoxLayout,
-    QHBoxLayout,
-    QWidget,
-    QPushButton,
-    QLabel,
     QMessageBox,
     QFileDialog,
-    QHeaderView,
-    QTableView,
-    QDialog,
-    QMenu,
-    QProgressBar,
+    QMenu
 )
 from PyQt6.QtCore import (
     Qt,
-    QSize,
     QSettings,
-    QThread,
-    pyqtSignal,
-    QAbstractTableModel,
-    QModelIndex,
 )
 from PyQt6.QtGui import (
-    QTextCursor,
-    QKeySequence,
-    QAction,
     QStandardItemModel,
     QStandardItem,
 )
