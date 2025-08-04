@@ -60,7 +60,7 @@ class AgentData:
 
         self.agent = Agent(
             model=self.model,
-            system_prompt=open("sys_prompt2.txt", "r", encoding="utf-8").read(),
+            system_prompt=open("sys_prompt.txt", "r", encoding="utf-8").read(),
             retries=3,
             output_type=self.OutputType,
             toolsets=[self.mcp_mysql],

@@ -5,7 +5,10 @@ from PyQt6.QtWidgets import (QApplication, QMainWindow, QTextEdit, QVBoxLayout,
                              QLabel, QCompleter, QTextBrowser, QTableView, QHeaderView, QComboBox)
 from PyQt6.QtCore import Qt, QStringListModel, QRect, QAbstractTableModel
 from PyQt6.QtGui import (QSyntaxHighlighter, QTextCharFormat, QColor, QFont, 
-                         QTextCursor, QKeySequence, QAction, QStandardItemModel, QStandardItem)
+                         QTextCursor, QKeySequence, QAction, QStandardItemModel, QStandardItem, QIcon)
+
+
+from Version import VERSION_NAME, VERSION_CODE, VERSION_RELEASE
 
 
 class SQLSyntaxHighlighter(QSyntaxHighlighter):
@@ -148,9 +151,13 @@ class SQLTextEdit(QTextEdit):
 
 class main_ui(object):
     def setupUi(self,main_ui):
-        self.setWindowTitle("AiSQL")
+        self.setWindowTitle(f"AiSQL v{VERSION_NAME}-{VERSION_RELEASE}")
         self.setGeometry(100, 100, 1000, 700)
         self.showMaximized()
+        
+        # Set application icon
+        icon = QIcon("ico.png")
+        self.setWindowIcon(icon)
         
         # Create central widget
         central_widget = QWidget()

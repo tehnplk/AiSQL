@@ -2,14 +2,13 @@
 Token configuration module for centralized API key management.
 Reads all API keys and tokens from token.txt file.
 """
-import os
 from typing import Dict
 
 
 def load_tokens() -> Dict[str, str]:
     """Load all tokens and API keys from token.txt file."""
     tokens = {}
-    token_file = os.path.join(os.path.dirname(__file__), 'token.txt')
+    token_file = 'token.txt'
     
     try:
         with open(token_file, 'r', encoding='utf-8') as f:
