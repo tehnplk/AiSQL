@@ -23,13 +23,14 @@ from PandasTableModel import PandasTableModel
 from sandbox import read_db_config
 
 from dotenv import load_dotenv
-#load_dotenv()
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
 
-import logfire
+load_dotenv()
+# load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
+
+"""import logfire
 logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
 logfire.instrument_mcp()
-logfire.instrument_pydantic_ai()
+logfire.instrument_pydantic_ai()"""
 
 from pydantic_ai import Agent
 from pydantic import BaseModel, Field
@@ -37,9 +38,6 @@ from pydantic_ai.mcp import MCPServerStdio
 
 
 from AgentWorker import AgentWorker
-
-
-
 
 
 class OutputType(BaseModel):
@@ -105,7 +103,7 @@ class main(QMainWindow, main_ui):
             self.agent_worker = None
 
         except Exception as e:
-            print(f"Error initializing AI components: {e}")
+            self._show_error(f"Error initializing AI components: {e}")
 
     def btn_chat(self):
         if (
@@ -144,7 +142,7 @@ class main(QMainWindow, main_ui):
                 )
                 self.agent_worker.start()
             except Exception as e:
-                print(f"Error initializing llm: {e}")
+                self._show_error(f"Error initializing llm: {e}")
                 self.agent_worker = None
                 self.chat_button.setEnabled(True)
                 self.chat_button.setText("Chat")
@@ -161,7 +159,7 @@ class main(QMainWindow, main_ui):
                 self.chat_button.setText("Chat")
 
     def on_progress_update(self, message):
-        print(f"Progress: {message}")
+        self.statusbar.showMessage(message)
 
     def on_message_history(self, message_history):
         """Handle message history update."""
@@ -188,18 +186,17 @@ class main(QMainWindow, main_ui):
             self.chat_button.setText("Chat")
 
         self.statusbar.showMessage(f"เกิดข้อผิดพลาด: {error_message}")
-        print(f"ERROR: {error_message}")
+        
 
     def run_query(self):
         """Execute SQL query using background thread and pandas model."""
         try:
             query = self.sql_editor.toPlainText().strip()
             if not query:
-                print("No query to run")
+                
                 return
 
-            print(f"\n=== Executing Query ===")
-            print(f"Query: {query}")
+            
 
             # Load database settings
             try:
@@ -211,18 +208,16 @@ class main(QMainWindow, main_ui):
                     "password": str(settings.value("password", "")),
                     "database": str(settings.value("database", "")),
                 }
-                print(
-                    f"Database config: {db_config['user']}@{db_config['host']}:{db_config['port']}/{db_config['database']}"
-                )
+                
             except Exception as e:
                 error_msg = f"เกิดข้อผิดพลาด: {str(e)}"
                 self._show_error(error_msg)
-                print(f"ERROR: {error_msg}")
+                
                 return
 
             # Check if required settings are present
             if not all([db_config["user"], db_config["database"]]):
-                print("Database not configured - showing demo data")
+                
                 self._show_demo_data()
                 return
 
@@ -239,7 +234,6 @@ class main(QMainWindow, main_ui):
             if any(keyword in query.upper() for keyword in forbidden_keywords):
                 error_message = "Not allowed to execute SQL commands that modify data or database structure"
                 self._show_error(error_message)
-                print(f"ERROR: {error_message}")
                 return
 
             # Disable run button and show progress
@@ -260,7 +254,6 @@ class main(QMainWindow, main_ui):
             # Catch-all exception handler to prevent application crash
             error_msg = f"เกิดข้อผิดพลาด: {str(e)}"
             self._show_error(error_msg)
-            print(f"DEBUG: {error_msg}")
 
             # Restore button state
             self.run_button.setEnabled(True)
@@ -272,9 +265,7 @@ class main(QMainWindow, main_ui):
         self.run_button.setEnabled(True)
         self.run_button.setText("Run Query")
 
-        print(f"\n=== Query Results ===")
-        print(f"Columns: {columns}")
-        print(f"Rows returned: {len(results)}")
+
 
         if not results:
             self.statusbar.showMessage("ไม่พบข้อมูล")
@@ -288,11 +279,7 @@ class main(QMainWindow, main_ui):
             self.pandas_model = None
             return
 
-        # Print first few rows to console
-        for i, row in enumerate(results[:10]):
-            print(f"Row {i+1}: {row}")
-        if len(results) > 10:
-            print(f"... and {len(results) - 10} more rows")
+
 
         # Convert results to pandas DataFrame
         df = pd.DataFrame(results, columns=columns)
@@ -318,8 +305,6 @@ class main(QMainWindow, main_ui):
         # Restore button state
         self.run_button.setEnabled(True)
         self.run_button.setText("Run Query")
-
-        print(f"ERROR: {error_message}")
 
         # Show error in a message box
         QMessageBox.critical(self, "Error", error_message)
@@ -460,18 +445,15 @@ class main(QMainWindow, main_ui):
                     "Success",
                     f"Data exported successfully\n{filename}\nRows: {len(df)}",
                 )
-                print(f"Data exported to: {filename}")
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Cannot export data: {str(e)}")
-            print(f"Export error: {e}")
 
     def _show_demo_data(self):
         """Show demo data when database is not configured"""
         self.status_label.setText(
             "Database not configured. Showing demo data. Configure database in File > Settings."
         )
-        print("\n=== Demo Data (Database not configured) ===")
 
         # Create demo data
         headers = ["ID", "Name", "Email", "Department", "Salary"]
@@ -482,11 +464,6 @@ class main(QMainWindow, main_ui):
             [4, "Alice Brown", "alice@example.com", "HR", 60000],
             [5, "Charlie Wilson", "charlie@example.com", "Engineering", 80000],
         ]
-
-        # Print to console
-        print(f"Columns: {headers}")
-        for i, row in enumerate(demo_rows):
-            print(f"Row {i+1}: {row}")
 
         # Create pandas DataFrame for demo data
         df = pd.DataFrame(demo_rows, columns=headers)
@@ -608,12 +585,10 @@ class main(QMainWindow, main_ui):
                     "Success",
                     f"SQL query saved to /sql directory\n{forced_path}",
                 )
-                print(f"SQL saved to: {forced_path}")
                 self.statusbar.showMessage(f"SQL saved to: {forced_path}")
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Cannot save SQL: {str(e)}")
-            print(f"Save error: {e}")
             self.statusbar.showMessage(f"Save error: {str(e)}")
 
     def open_sql(self):
@@ -646,28 +621,20 @@ class main(QMainWindow, main_ui):
                     "Success",
                     f"SQL file loaded successfully\n{filename}",
                 )
-                print(f"SQL loaded from: {filename}")
                 self.statusbar.showMessage(f"SQL loaded from: {filename}")
 
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Cannot open SQL file: {str(e)}")
-            print(f"Open error: {e}")
             self.statusbar.showMessage(f"Open error: {str(e)}")
 
 
 if __name__ == "__main__":
-    try:
-        print("Starting application...")
-        app = QApplication(sys.argv)
-        app.setStyle("Fusion")
 
-        print("Creating main window...")
-        editor = main()
-        print("Showing window...")
-        editor.show()
+    app = QApplication(sys.argv)
+    app.setStyle("Fusion")
 
-        print("Starting event loop...")
-        sys.exit(app.exec())
+    win = main()
 
-    except Exception as e:
-        print(f"Fatal error: {e}")
+    win.show()
+
+    sys.exit(app.exec())
