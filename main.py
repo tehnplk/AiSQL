@@ -17,7 +17,7 @@ from db_setting_dlg import DbSettingsDialog
 # Import MySQLFormatter for SQL formatting
 from SQLFormatter import MySQLFormatter
 
-from ChatExecutor import ChatExecutor
+from AgentDataThread import AgentDataThread
 
 from QueryExecutor import QueryExecutor
 
@@ -85,14 +85,14 @@ class main(QMainWindow, main_ui):
 
             # Start background chat execution with selected model
             selected_model = self.model_combo.currentText()
-            self.chat_executor = ChatExecutor(
+            self.agent_data_thread = AgentDataThread(
                 selected_model, user_prompt, self.message_history
             )
-            self.chat_executor.signal_finished.connect(self.on_chat_finished)
-            self.chat_executor.signal_error.connect(self.on_chat_error)
-            self.chat_executor.signal_progress.connect(self.on_chat_progress_update)
-            self.chat_executor.signal_message_history.connect(self.on_message_history)
-            self.chat_executor.start()
+            self.agent_data_thread.signal_finished.connect(self.on_chat_finished)
+            self.agent_data_thread.signal_error.connect(self.on_chat_error)
+            self.agent_data_thread.signal_progress.connect(self.on_progress_update)
+            self.agent_data_thread.signal_message_history.connect(self.on_message_history)
+            self.agent_data_thread.start()
 
         except Exception as e:
             # Catch-all exception handler for TaskGroup and other async errors
@@ -105,7 +105,7 @@ class main(QMainWindow, main_ui):
                 self.chat_button.setEnabled(True)
                 self.chat_button.setText("Chat")
 
-    def on_chat_progress_update(self, message):
+    def on_progress_update(self, message):
         print(f"Progress: {message}")
 
     def on_message_history(self, message_history):
