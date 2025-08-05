@@ -132,7 +132,7 @@ class main(QMainWindow, main_ui):
             self.chat_button.setEnabled(True)
             self.chat_button.setText("Chat")
 
-        self.statusbar.showMessage("เกิดข้อผิดพลาด: Error occurred during chat processing")
+        self.statusbar.showMessage(f"เกิดข้อผิดพลาด: {error_message}")
         print(f"ERROR: {error_message}")
         
 
