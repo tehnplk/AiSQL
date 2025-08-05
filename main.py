@@ -1,4 +1,4 @@
-import sys
+import sys, os
 import re
 import pandas as pd
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMessageBox, QFileDialog, QMenu
@@ -11,24 +11,24 @@ from PyQt6.QtGui import (
     QStandardItem,
 )
 from main_ui import main_ui
+
 from db_setting_dlg import DbSettingsDialog
 
-
-# Import MySQLFormatter for SQL formatting
 from SQLFormatter import MySQLFormatter
 
 from QueryExecutor import QueryExecutor
 
 from PandasTableModel import PandasTableModel
 
-import os
-
-
-import logfire
-from tokenn import LOGFIRE_KEY
 from sandbox import read_db_config
 
-logfire.configure(token=LOGFIRE_KEY)
+from dotenv import load_dotenv
+#load_dotenv()
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
+
+import logfire
+logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
+logfire.instrument_mcp()
 logfire.instrument_pydantic_ai()
 
 from pydantic_ai import Agent
@@ -36,11 +36,10 @@ from pydantic import BaseModel, Field
 from pydantic_ai.mcp import MCPServerStdio
 
 
-from sandbox import read_db_config
 from AgentWorker import AgentWorker
-from dotenv import load_dotenv
 
-load_dotenv()
+
+
 
 
 class OutputType(BaseModel):
@@ -130,8 +129,8 @@ class main(QMainWindow, main_ui):
             selected_model = self.model_combo.currentText()
             try:
                 llm_model = f"google-gla:{selected_model}"
-                #from ModelGemini import ModelGemini
-                #from ModelHorizon import ModelHorizon
+                # from ModelGemini import ModelGemini
+                # from ModelHorizon import ModelHorizon
                 self.agent_init(llm_model)
 
                 self.agent_worker = AgentWorker(
