@@ -134,11 +134,7 @@ class main(QMainWindow, main_ui):
 
         self.statusbar.showMessage("เกิดข้อผิดพลาด: Error occurred during chat processing")
         print(f"ERROR: {error_message}")
-
-        # Show error in a message box
-        QMessageBox.critical(
-            self, "เกิดข้อผิดพลาด", f"{error_message}\n กรุณาดำเนินการใหม่อีกครั้ง"
-        )
+        
 
     def run_query(self):
         """Execute SQL query using background thread and pandas model."""
