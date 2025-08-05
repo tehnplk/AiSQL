@@ -17,20 +17,43 @@ from db_setting_dlg import DbSettingsDialog
 # Import MySQLFormatter for SQL formatting
 from SQLFormatter import MySQLFormatter
 
-from AgentDataThread import AgentDataThread
-
 from QueryExecutor import QueryExecutor
 
 from PandasTableModel import PandasTableModel
 
 import os
 
-"""
+
 import logfire
-from tokenn import LOGFIRE_KEY
+from tokenn import LOGFIRE_KEY, GEMINI_API_KEY
+from sandbox import read_db_config
+
 logfire.configure(token=LOGFIRE_KEY)
 logfire.instrument_pydantic_ai()
-"""
+
+from pydantic_ai import Agent
+from pydantic import BaseModel, Field
+from pydantic_ai.mcp import MCPServerStdio
+from pydantic_ai.models.gemini import GeminiModel
+from pydantic_ai.providers.google_gla import GoogleGLAProvider
+
+from tokenn import GEMINI_API_KEY
+
+from sandbox import read_db_config
+from AgentWorker import AgentWorker
+from dotenv import load_dotenv
+
+load_dotenv()
+
+
+class OutputType(BaseModel):
+    sql: str = Field(
+        description="SQL query if use alias name need to cover by `` and remove limit clause at end of command,if no sql return empty string"
+    )
+    csv: str = Field(description="The result of the agent in csv format")
+    explanation: str = Field(
+        description="The explanation of the result or result value not in tabular or markdown format , Limit in 200 words."
+    )
 
 
 class main(QMainWindow, main_ui):
@@ -68,31 +91,57 @@ class main(QMainWindow, main_ui):
         if hasattr(self, "run_action"):
             self.run_action.triggered.connect(self.run_query)
 
+    def agent_init(self, llm_model):
+        try:
+            mcp_mysql = MCPServerStdio(
+                "uvx",
+                ["--from", "mysql-mcp-server", "mysql_mcp_server"],
+                read_db_config(),
+            )
+            system_prompt = open("sys_prompt.txt", "r", encoding="utf-8").read()
+            self.agent = Agent(
+                model=llm_model,
+                instrument=True,
+                output_type=OutputType,
+                toolsets=[mcp_mysql],
+                system_prompt=system_prompt,
+            )
+            self.agent_worker = None
+
+        except Exception as e:
+            print(f"Error initializing AI components: {e}")
+
     def btn_chat(self):
-        """Execute chat query using background thread."""
+        if (
+            hasattr(self, "agent_worker")
+            and self.agent_worker
+            and self.agent_worker.isRunning()
+        ):
+            return
+
         try:
             user_prompt = self.chat_text.toPlainText().strip()
             if not user_prompt:
                 return
 
-            # Clear SQL editor
             self.sql_editor.setPlainText("")
 
-            # Disable chat button during processing
             if hasattr(self, "chat_button"):
                 self.chat_button.setEnabled(False)
                 self.chat_button.setText("Thinking...")
 
             # Start background chat execution with selected model
             selected_model = self.model_combo.currentText()
-            self.agent_data_thread = AgentDataThread(
-                selected_model, user_prompt, self.message_history
+            llm_model = "google-gla:gemini-2.5-flash"
+            self.agent_init(llm_model)
+            self.agent_worker = AgentWorker(
+                self.agent, user_prompt, self.message_history
             )
-            self.agent_data_thread.signal_finished.connect(self.on_chat_finished)
-            self.agent_data_thread.signal_error.connect(self.on_chat_error)
-            self.agent_data_thread.signal_progress.connect(self.on_progress_update)
-            self.agent_data_thread.signal_message_history.connect(self.on_message_history)
-            self.agent_data_thread.start()
+            self.agent_worker.signal_finished.connect(self.on_chat_finished)
+            self.agent_worker.signal_error.connect(self.on_chat_error)
+            self.agent_worker.signal_progress.connect(self.on_progress_update)
+            self.agent_worker.signal_message_history.connect(self.on_message_history)
+            self.agent_worker.start()
 
         except Exception as e:
             # Catch-all exception handler for TaskGroup and other async errors
@@ -134,7 +183,6 @@ class main(QMainWindow, main_ui):
 
         self.statusbar.showMessage(f"เกิดข้อผิดพลาด: {error_message}")
         print(f"ERROR: {error_message}")
-        
 
     def run_query(self):
         """Execute SQL query using background thread and pandas model."""
