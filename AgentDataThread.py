@@ -44,21 +44,23 @@ class AgentDataThread(QThread):
             model, provider=GoogleGLAProvider(api_key=GEMINI_API_KEY)
         )
 
-    def run(self):
-        """Execute the chat query in background."""
+    async def chat(self):
         try:
             self.signal_progress.emit("Thinking...")
 
-            self.agent = Agent(
+            agent = Agent(
                 model=self.model,
                 system_prompt=open("sys_prompt.txt", "r", encoding="utf-8").read(),
                 retries=3,
                 output_type=OutputType,
                 toolsets=[mcp_mysql],
             )
-            result = asyncio.run(
-                self.agent.run(self.user_prompt, message_history=self.message_history)
-            )
+
+            async with agent:
+                result = await agent.run(
+                    self.user_prompt, message_history=self.message_history
+                )
+
             new_message_history = result.all_messages()
             self.signal_message_history.emit(new_message_history)
 
@@ -70,3 +72,6 @@ class AgentDataThread(QThread):
 
         except Exception as e:
             self.signal_error.emit(f"เกิดข้อผิดพลาด: {str(e)}")
+
+    def run(self):
+        asyncio.run(self.chat())
