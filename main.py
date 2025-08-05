@@ -25,7 +25,7 @@ import os
 
 
 import logfire
-from tokenn import LOGFIRE_KEY, GEMINI_API_KEY
+from tokenn import LOGFIRE_KEY
 from sandbox import read_db_config
 
 logfire.configure(token=LOGFIRE_KEY)
@@ -34,10 +34,7 @@ logfire.instrument_pydantic_ai()
 from pydantic_ai import Agent
 from pydantic import BaseModel, Field
 from pydantic_ai.mcp import MCPServerStdio
-from pydantic_ai.models.gemini import GeminiModel
-from pydantic_ai.providers.google_gla import GoogleGLAProvider
 
-from tokenn import GEMINI_API_KEY
 
 from sandbox import read_db_config
 from AgentWorker import AgentWorker
@@ -131,22 +128,33 @@ class main(QMainWindow, main_ui):
                 self.chat_button.setText("Thinking...")
 
             selected_model = self.model_combo.currentText()
-            llm_model = f"google-gla:{selected_model}"
-            self.agent_init(llm_model)
-            self.agent_worker = AgentWorker(
-                self.agent, user_prompt, self.message_history
-            )
-            self.agent_worker.signal_finished.connect(self.on_chat_finished)
-            self.agent_worker.signal_error.connect(self.on_chat_error)
-            self.agent_worker.signal_progress.connect(self.on_progress_update)
-            self.agent_worker.signal_message_history.connect(self.on_message_history)
-            self.agent_worker.start()
+            try:
+                llm_model = f"google-gla:{selected_model}"
+                #from ModelGemini import ModelGemini
+                #from ModelHorizon import ModelHorizon
+                self.agent_init(llm_model)
+
+                self.agent_worker = AgentWorker(
+                    self.agent, user_prompt, self.message_history
+                )
+                self.agent_worker.signal_finished.connect(self.on_chat_finished)
+                self.agent_worker.signal_error.connect(self.on_chat_error)
+                self.agent_worker.signal_progress.connect(self.on_progress_update)
+                self.agent_worker.signal_message_history.connect(
+                    self.on_message_history
+                )
+                self.agent_worker.start()
+            except Exception as e:
+                print(f"Error initializing llm: {e}")
+                self.agent_worker = None
+                self.chat_button.setEnabled(True)
+                self.chat_button.setText("Chat")
+                return
 
         except Exception as e:
             # Catch-all exception handler for TaskGroup and other async errors
             error_msg = f"เกิดข้อผิดพลาด: {str(e)}"
             self._show_error(error_msg)
-            print(f"DEBUG: {error_msg}")
 
             # Restore button state
             if hasattr(self, "chat_button"):
