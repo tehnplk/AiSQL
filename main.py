@@ -130,9 +130,8 @@ class main(QMainWindow, main_ui):
                 self.chat_button.setEnabled(False)
                 self.chat_button.setText("Thinking...")
 
-            # Start background chat execution with selected model
             selected_model = self.model_combo.currentText()
-            llm_model = "google-gla:gemini-2.5-flash"
+            llm_model = f"google-gla:{selected_model}"
             self.agent_init(llm_model)
             self.agent_worker = AgentWorker(
                 self.agent, user_prompt, self.message_history
