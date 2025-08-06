@@ -24,7 +24,7 @@ from PandasTableModel import PandasTableModel
 from AgentDataWorker import AgentDataWorker
 
 
-class main(QMainWindow, main_ui):
+class main(main_ui):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setupUi()

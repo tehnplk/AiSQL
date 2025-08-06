@@ -296,7 +296,7 @@ class SQLTextEdit(QTextEdit):
             self.completer.popup().hide()
 
 
-class main_ui(object):
+class main_ui(QMainWindow):
     def setupUi(self):
 
 
