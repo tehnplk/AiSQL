@@ -1,5 +1,6 @@
 import sys
 import re
+import os
 from PyQt6.QtWidgets import (
     QApplication,
     QMainWindow,
@@ -298,7 +299,11 @@ class SQLTextEdit(QTextEdit):
 
 class main_ui(QMainWindow):
     def setupUi(self):
-
+        #set window icon
+        icon_path = 'ico.ico'
+        if os.path.exists(icon_path):
+            icon = QIcon(icon_path)
+            self.setWindowIcon(icon)
 
         self.setWindowTitle(f"AiSQL v{VERSION_NAME}-{VERSION_RELEASE}")
         self.setGeometry(100, 100, 1000, 700)

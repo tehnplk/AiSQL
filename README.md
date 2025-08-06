@@ -32,25 +32,24 @@ To build the Windows executable, run:
 python build_exe.py
 ```
 
-This will create a standalone executable in the `dist/main` directory.
+This will create a standalone executable in the `dist/AiSQL` directory.
 
 ## Usage
 
 Run the application:
 
 - Development: `python main.py`
-- Executable: Run `dist/main/main.exe`
+- Executable: Run `dist/AiSQL/AiSQL.exe`
 
 ## Troubleshooting
 
 If you encounter QPainter errors when running the executable, ensure that:
 
-1. All Qt plugins are included in the build (handled by the spec file)
+1. All Qt plugins are included in the build (handled by the build script)
 2. Icon files are properly packaged
-3. The application is built with the latest spec file
+3. The application is built with the latest build script
 
 To rebuild with a clean build:
 
 ```bash
-python -m PyInstaller --clean main.spec
-```
+python build_exe.py
