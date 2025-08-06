@@ -71,7 +71,14 @@ class main(QMainWindow, main_ui):
             if not user_prompt:
                 return
 
-            self.sql_editor.setPlainText("")
+            # Show "Ai is thinking..." in the query text box
+            self.results_data = []
+            self.columns_data = []
+            self.pandas_model = None
+            self.results_area.setModel(None)
+            self.sql_editor.setPlainText("Ai is thinking...")
+            
+            
 
             if hasattr(self, "chat_button"):
                 self.chat_button.setEnabled(False)
@@ -142,6 +149,7 @@ class main(QMainWindow, main_ui):
             self.chat_button.setText("Chat")
 
         self._show_error(error_message)
+        self.sql_editor.setPlainText(error_message)
         print(f"Ai ทำงานผิดพลาด {error_message}")
 
     def run_query(self):

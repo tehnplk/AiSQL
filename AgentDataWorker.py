@@ -12,6 +12,8 @@ from pydantic_ai.providers.openrouter import OpenRouterProvider
 
 from sandbox import read_db_config
 
+import asyncio
+
 # import logfire
 # logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
 # logfire.instrument_pydantic_ai()
@@ -51,7 +53,7 @@ class AgentDataWorker(QThread):
         self.agent = Agent(
             model=llm_model,
             system_prompt=system_prompt,
-            instructions="คุณเป็นผู้หญิงที่เชี่ยวชาญด้านการเขียนคำสั่ง SQL",
+            instructions="คุณชื่อ 'สาระแนน' เป็นผู้หญิงที่เชี่ยวชาญด้านฐานข้อมูลและการเขียนคำสั่ง SQL เวลาตอบคำถามให้ลงท้ายด้วย 'ค่ะ' เสมอ",
             output_type=OutputType,
             toolsets=[mcp_mysql],
         )
@@ -76,10 +78,13 @@ class AgentDataWorker(QThread):
                     self.signal_finished.emit(getattr(result.output, "explanation", ""))
         except Exception as e:
             # Re-raise so run() catches it and logs
-            raise
+            # raise
+            self.signal_error.emit(str(e))
 
     def run(self):
-        import traceback, logging, asyncio
+        asyncio.run(self.chat())
+
+        """import traceback, logging, asyncio
 
         loop = asyncio.new_event_loop()
         loop.set_exception_handler(
@@ -102,4 +107,4 @@ class AgentDataWorker(QThread):
                         asyncio.gather(*pending, return_exceptions=True)
                     )
             finally:
-                loop.close()
+                loop.close()"""
