@@ -11,9 +11,8 @@ from sandbox import read_db_config
 
 import asyncio
 
-from LoadEnv import load_env_for_pyinstaller
-
-load_env_for_pyinstaller()
+from dotenv import load_dotenv
+load_dotenv()
 
 """
 import logfire
@@ -97,7 +96,7 @@ class AgentDataWorker(QThread):
             # Re-raise so run() catches it and logs
             # raise
             self.signal_error.emit(str(e))
-            print(f"Ai agent error : {str(e)}")
+            print(f"Ai agent run chat error : {str(e)}")
 
     def run(self):
         asyncio.run(self.chat())

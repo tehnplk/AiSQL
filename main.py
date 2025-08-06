@@ -23,9 +23,6 @@ from PandasTableModel import PandasTableModel
 
 from AgentDataWorker import AgentDataWorker
 
-from LoadEnv import load_env_for_pyinstaller
-
-load_env_for_pyinstaller()
 
 class main(QMainWindow, main_ui):
     def __init__(self, parent=None):
