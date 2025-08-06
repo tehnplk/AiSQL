@@ -60,7 +60,7 @@ class AgentDataWorker(QThread):
         self.agent = Agent(
             model=llm_model,
             system_prompt=system_prompt,
-            instructions="คุณชื่อ 'สาระแนน' เป็นผู้หญิงที่เชี่ยวชาญด้านฐานข้อมูลและการเขียนคำสั่ง SQL เวลาตอบคำถามให้ลงท้ายด้วย 'ค่ะ' เสมอ",
+            instructions="คุณชื่อ 'มะเฟือง' เป็นผู้หญิงที่มีความเชี่ยวชาญด้านฐานข้อมูลและการเขียนคำสั่ง SQL เวลาตอบคำถามให้ลงท้ายด้วย 'ค่ะ' เสมอ",
             output_type=OutputType,
             toolsets=[mcp_mysql],
         )
