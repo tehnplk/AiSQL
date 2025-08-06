@@ -297,7 +297,9 @@ class SQLTextEdit(QTextEdit):
 
 
 class main_ui(object):
-    def setupUi(self, main_ui):
+    def setupUi(self):
+
+
         self.setWindowTitle(f"AiSQL v{VERSION_NAME}-{VERSION_RELEASE}")
         self.setGeometry(100, 100, 1000, 700)
         self.showMaximized()

@@ -27,7 +27,7 @@ from AgentDataWorker import AgentDataWorker
 class main(QMainWindow, main_ui):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setupUi(self)
+        self.setupUi()
 
         # Initialize instance variables
         self.query_executor = None
