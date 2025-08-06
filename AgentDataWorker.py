@@ -7,22 +7,18 @@ from pydantic_ai.mcp import MCPServerStdio
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openrouter import OpenRouterProvider
 
-from sandbox import read_db_config
-
-import asyncio
-
 from dotenv import load_dotenv
 
 load_dotenv()
 
-print('OPENROUTER_API_KEY',os.getenv("OPENROUTER_API_KEY"))
-print('GEMINI_API_KEY',os.getenv("GEMINI_API_KEY"))
 
 """
 import logfire
 logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
 logfire.instrument_pydantic_ai()
 """
+
+sys_prompt = open("sys_prompt.txt", "r", encoding="utf-8").read()
 
 
 class OutputType(BaseModel):
@@ -49,32 +45,25 @@ class AgentDataWorker(QThread):
                 provider=OpenRouterProvider(api_key=os.getenv("OPENROUTER_API_KEY")),
             )
 
-        try:
-            db_config = read_db_config()
-        except Exception as e:
-            print(f"agent sandbox error: {str(e)}")
-
-        # print(f"agent sandbox: \n{db_config}")
-
-        mcp_mysql = MCPServerStdio(
+        # ควรใช้ MCPServerSSE แทน MCPServerStdio เพื่อหลีกเลี่ยง error TaskGroup
+        self.mcp_mysql = MCPServerStdio(
             "uvx",
             ["--from", "mysql-mcp-server", "mysql_mcp_server"],
-            db_config,
+            {
+                "MYSQL_HOST": os.getenv("SANDBOX_HOST"),
+                "MYSQL_PORT": os.getenv("SANDBOX_PORT"),
+                "MYSQL_USER": os.getenv("SANDBOX_USER"),
+                "MYSQL_PASSWORD": os.getenv("SANDBOX_PASSWORD"),
+                "MYSQL_DATABASE": os.getenv("SANDBOX_DATABASE"),
+            },
         )
-
-        try:
-            system_prompt = open("sys_prompt.txt", "r", encoding="utf-8").read()
-        except Exception as e:
-            print(f"agent system prompt error: {str(e)}")
-
-        # print(f"agent system prompt: \n{system_prompt}")
 
         self.agent = Agent(
             model=llm_model,
-            system_prompt=system_prompt,
+            system_prompt=sys_prompt,
             instructions="คุณชื่อ 'มะเฟือง' เป็นผู้หญิงที่มีความเชี่ยวชาญด้านฐานข้อมูลและการเขียนคำสั่ง SQL เวลาตอบคำถามให้ลงท้ายด้วย 'ค่ะ' เสมอ",
             output_type=OutputType,
-            toolsets=[mcp_mysql],
+            toolsets=[self.mcp_mysql],
         )
 
         self.user_input = user_input
@@ -82,11 +71,13 @@ class AgentDataWorker(QThread):
         self.new_message_history = []
 
     async def chat(self):
+
         try:
             async with self.agent:
                 result = await self.agent.run(
                     self.user_input, message_history=self.message_history
                 )
+
                 self.new_message_history = result.all_messages()
                 self.signal_message_history.emit(self.new_message_history)
 
@@ -103,9 +94,8 @@ class AgentDataWorker(QThread):
             print(f"Ai agent run chat error : {str(e)}")
 
     def run(self):
-        asyncio.run(self.chat())
-
-        """import traceback, logging, asyncio
+        import traceback, logging, asyncio
+        # asyncio.run(self.chat())
 
         loop = asyncio.new_event_loop()
         loop.set_exception_handler(
@@ -128,4 +118,4 @@ class AgentDataWorker(QThread):
                         asyncio.gather(*pending, return_exceptions=True)
                     )
             finally:
-                loop.close()"""
+                loop.close()

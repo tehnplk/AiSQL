@@ -590,7 +590,7 @@ class main(main_ui):
 
 if __name__ == "__main__":
     print("Ai agent is running on background..")
-    print(f"Don't close this terminal...")
+    print(f"Do not close this terminal...")
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     win = main()
