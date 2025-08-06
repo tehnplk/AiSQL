@@ -194,9 +194,16 @@ class main(QMainWindow, main_ui):
                 "TRUNCATE",
             ]
             if any(keyword in query.upper() for keyword in forbidden_keywords):
-                error_message = "Not allowed to execute SQL commands that modify data or database structure"
-                self._show_error(error_message)
-                return
+                #warn user by ConfirmDialog
+                reply = QMessageBox.warning(
+                    self,
+                    "Warning",
+                    "คิวรีนี้จะแก้ไขฐานข้อมูล คุณแน่ใจว่าต้องการรันคิวรีนี้หรือไม่?",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                    QMessageBox.StandardButton.No,
+                )
+                if reply == QMessageBox.StandardButton.No:
+                    return
 
             # Disable run button and show progress
             self.run_button.setEnabled(False)

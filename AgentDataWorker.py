@@ -14,18 +14,25 @@ from sandbox import read_db_config
 
 import asyncio
 
-# import logfire
-# logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
-# logfire.instrument_pydantic_ai()
+"""
+import logfire
+logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
+logfire.instrument_pydantic_ai()
+"""
 
 
 class OutputType(BaseModel):
     sql: str = Field(
-        description="SQL query if use alias name need to cover by `` and remove limit clause at end of command,if no sql return empty string"
+        description="The SQL query that agent used. If use alias name need to cover by `` and remove limit clause at end of command. If no sql return empty string"
     )
-    csv: str = Field(description="The result of the agent in csv format")
+    csv: str = Field(
+        description="The result of the query in csv format. Implement for select command only. If no csv return empty string"
+    )
     explanation: str = Field(
-        description="The explanation of the result or result value not in tabular or markdown format , Limit in 200 words."
+        description="The explanation of the result Limit in 200 words. If no explanation return empty string"
+    )
+    answer: str = Field(
+        description="The answer of the agent when user ask question not related to database. If no answer return empty string"
     )
 
 
@@ -75,7 +82,12 @@ class AgentDataWorker(QThread):
                 if getattr(result.output, "sql", None):
                     self.signal_finished.emit(result.output.sql)
                 else:
-                    self.signal_finished.emit(getattr(result.output, "explanation", ""))
+                    self.signal_finished.emit(result.output.answer)
+
+                print("Ai output :")
+                print(result.output.answer)
+                print(result.output.explanation)
+
         except Exception as e:
             # Re-raise so run() catches it and logs
             # raise
