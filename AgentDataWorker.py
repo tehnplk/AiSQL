@@ -12,7 +12,11 @@ from sandbox import read_db_config
 import asyncio
 
 from dotenv import load_dotenv
+
 load_dotenv()
+
+print('OPENROUTER_API_KEY',os.getenv("OPENROUTER_API_KEY"))
+print('GEMINI_API_KEY',os.getenv("GEMINI_API_KEY"))
 
 """
 import logfire
@@ -50,7 +54,7 @@ class AgentDataWorker(QThread):
         except Exception as e:
             print(f"agent sandbox error: {str(e)}")
 
-        #print(f"agent sandbox: \n{db_config}")
+        # print(f"agent sandbox: \n{db_config}")
 
         mcp_mysql = MCPServerStdio(
             "uvx",
@@ -63,7 +67,7 @@ class AgentDataWorker(QThread):
         except Exception as e:
             print(f"agent system prompt error: {str(e)}")
 
-        #print(f"agent system prompt: \n{system_prompt}")
+        # print(f"agent system prompt: \n{system_prompt}")
 
         self.agent = Agent(
             model=llm_model,

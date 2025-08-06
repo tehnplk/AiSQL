@@ -302,10 +302,6 @@ class main_ui(object):
         self.setGeometry(100, 100, 1000, 700)
         self.showMaximized()
 
-        # Set application icon
-        icon = QIcon("ico.png")
-        self.setWindowIcon(icon)
-
         # Create central widget
         central_widget = QWidget()
         self.setCentralWidget(central_widget)

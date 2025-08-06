@@ -411,7 +411,7 @@ class main(QMainWindow, main_ui):
 
     def _show_demo_data(self):
         """Show demo data when database is not configured"""
-        self.status_label.setText(
+        self.statusbar.showMessage(
             "Database not configured. Showing demo data. Configure database in File > Settings."
         )
 
