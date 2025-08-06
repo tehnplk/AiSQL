@@ -133,7 +133,7 @@ class main(main_ui):
 
         # Format the SQL
         self.format_sql()
-        print(f"Ai ทำงาน...เสร็จสิ้น")
+        print(f"Ai ทำงาน...สำเร็จ")
 
     def on_chat_error(self, error_message):
         """Handle chat error."""
@@ -144,7 +144,7 @@ class main(main_ui):
 
         self._show_error(error_message)
         self.sql_editor.setPlainText(error_message)
-        print(f"Ai ทำงานผิดพลาด {error_message}")
+        print(f"Ai ทำงาน...ผิดพลาด {error_message}")
 
     def run_query(self):
         """Execute SQL query using background thread and pandas model."""
