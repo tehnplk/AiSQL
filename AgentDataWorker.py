@@ -1,3 +1,4 @@
+import os
 from PyQt6.QtCore import QThread, pyqtSignal
 from dotenv import load_dotenv
 
@@ -6,6 +7,9 @@ load_dotenv()
 from pydantic_ai import Agent
 from pydantic import BaseModel, Field
 from pydantic_ai.mcp import MCPServerStdio
+from pydantic_ai.models.openai import OpenAIModel
+from pydantic_ai.providers.openrouter import OpenRouterProvider
+
 from sandbox import read_db_config
 
 
@@ -27,6 +31,13 @@ class AgentDataWorker(QThread):
 
     def __init__(self, llm_model, user_input, message_history):
         super().__init__()
+
+        if llm_model == "openrouter/horizon-beta":
+            llm_model = OpenAIModel(
+                model="openrouter/horizon-beta",
+                provider=OpenRouterProvider(api_key=os.getenv("OPENROUTER_API_KEY")),
+            )
+
         mcp_mysql = MCPServerStdio(
             "uvx",
             ["--from", "mysql-mcp-server", "mysql_mcp_server"],
@@ -37,7 +48,7 @@ class AgentDataWorker(QThread):
             model=llm_model,
             instrument=True,
             output_type=OutputType,
-            toolsets=[mcp_mysql],
+            # toolsets=[mcp_mysql],
             system_prompt=system_prompt,
         )
 
