@@ -25,29 +25,9 @@ from sandbox import read_db_config
 from dotenv import load_dotenv
 
 load_dotenv()
-# load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
-
-"""import logfire
-logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
-logfire.instrument_mcp()
-logfire.instrument_pydantic_ai()"""
-
-from pydantic_ai import Agent
-from pydantic import BaseModel, Field
-from pydantic_ai.mcp import MCPServerStdio
 
 
-from AgentWorker import AgentWorker
-
-
-class OutputType(BaseModel):
-    sql: str = Field(
-        description="SQL query if use alias name need to cover by `` and remove limit clause at end of command,if no sql return empty string"
-    )
-    csv: str = Field(description="The result of the agent in csv format")
-    explanation: str = Field(
-        description="The explanation of the result or result value not in tabular or markdown format , Limit in 200 words."
-    )
+from AgentDataWorker import AgentDataWorker
 
 
 class main(QMainWindow, main_ui):
@@ -85,34 +65,7 @@ class main(QMainWindow, main_ui):
         if hasattr(self, "run_action"):
             self.run_action.triggered.connect(self.run_query)
 
-    def agent_init(self, llm_model):
-        try:
-            mcp_mysql = MCPServerStdio(
-                "uvx",
-                ["--from", "mysql-mcp-server", "mysql_mcp_server"],
-                read_db_config(),
-            )
-            system_prompt = open("sys_prompt.txt", "r", encoding="utf-8").read()
-            self.agent = Agent(
-                model=llm_model,
-                instrument=True,
-                output_type=OutputType,
-                toolsets=[mcp_mysql],
-                system_prompt=system_prompt,
-            )
-            self.agent_worker = None
-
-        except Exception as e:
-            self._show_error(f"Error initializing AI components: {e}")
-
     def btn_chat(self):
-        if (
-            hasattr(self, "agent_worker")
-            and self.agent_worker
-            and self.agent_worker.isRunning()
-        ):
-            return
-
         try:
             user_prompt = self.chat_text.toPlainText().strip()
             if not user_prompt:
@@ -127,12 +80,9 @@ class main(QMainWindow, main_ui):
             selected_model = self.model_combo.currentText()
             try:
                 llm_model = f"google-gla:{selected_model}"
-                # from ModelGemini import ModelGemini
-                # from ModelHorizon import ModelHorizon
-                self.agent_init(llm_model)
 
-                self.agent_worker = AgentWorker(
-                    self.agent, user_prompt, self.message_history
+                self.agent_worker = AgentDataWorker(
+                    llm_model, user_prompt, self.message_history
                 )
                 self.agent_worker.signal_finished.connect(self.on_chat_finished)
                 self.agent_worker.signal_error.connect(self.on_chat_error)
@@ -185,18 +135,15 @@ class main(QMainWindow, main_ui):
             self.chat_button.setEnabled(True)
             self.chat_button.setText("Chat")
 
-        self.statusbar.showMessage(f"เกิดข้อผิดพลาด: {error_message}")
-        
+        self._show_error(error_message)
 
     def run_query(self):
         """Execute SQL query using background thread and pandas model."""
         try:
             query = self.sql_editor.toPlainText().strip()
             if not query:
-                
+                self._show_error("กรุณากรอกคำสั่ง SQL")
                 return
-
-            
 
             # Load database settings
             try:
@@ -208,16 +155,16 @@ class main(QMainWindow, main_ui):
                     "password": str(settings.value("password", "")),
                     "database": str(settings.value("database", "")),
                 }
-                
+
             except Exception as e:
                 error_msg = f"เกิดข้อผิดพลาด: {str(e)}"
                 self._show_error(error_msg)
-                
+
                 return
 
             # Check if required settings are present
             if not all([db_config["user"], db_config["database"]]):
-                
+
                 self._show_demo_data()
                 return
 
@@ -265,8 +212,6 @@ class main(QMainWindow, main_ui):
         self.run_button.setEnabled(True)
         self.run_button.setText("Run Query")
 
-
-
         if not results:
             self.statusbar.showMessage("ไม่พบข้อมูล")
             # Show no data message
@@ -278,8 +223,6 @@ class main(QMainWindow, main_ui):
             self.results_area.setModel(model)
             self.pandas_model = None
             return
-
-
 
         # Convert results to pandas DataFrame
         df = pd.DataFrame(results, columns=columns)
@@ -629,12 +572,10 @@ class main(QMainWindow, main_ui):
 
 
 if __name__ == "__main__":
-
+    print('Ai agent is running on background..')
+    print(f"Don't close this terminal...")
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
-
     win = main()
-
     win.show()
-
     sys.exit(app.exec())
