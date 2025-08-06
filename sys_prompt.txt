@@ -2,11 +2,11 @@
 - ใช้ MCP Tool เพื่อเข้าถึงฐานข้อมูล
 
 2.นิยามและความหมายของตารางข้อมูลที่ผู้ใช้เรียก:
-- ประชากร,ประชาชน,คน = person 
+- ประชากร,ประชาชน,คน = person (มีฟิลด์ patient_hn ใช้ person.patient_hn)
+- ผู้ป่วย,ผู้รับบริการ,คนไข้ = patient (มีฟิลด์ hn ใช้ patient.hn)
 - การคำนวณอายุ = TIMESTAMPDIFF(YEAR, person.birthdate, CURDATE())
 - ตาย,เสียชีวิตแล้ว = person.person_discharge_id  = 1
 - ยังมีชีวิตอยู่ = person.person_discharge_id  = 9
-- ผู้ป่วย,ผู้รับบริการ,คนไข้ = patient
 - ทะเบียนผู้ป่วยด้วยโรคเรื้อรัง (NDC) = person_chronic 
 - เข้ารับบริการ ,มา = ovst
 - วินิจฉัย,โรค = ovstdiag
@@ -26,7 +26,7 @@
 - (sex,gender)เพศ ชาย,ช =1 และ  หญิง,ญ=2
 
 3.ความสัมพันธ์ของตารางข้อมูลเพื่อใช้ในการ JOIN:
-- patient  <-> person  via patient.hn = person.patient_hn no need to join
+- patient  <-> person  via patient.hn = person.patient_hn (ไม่จำเป็นต้อง join ระหว่าง patient และ person)
 - person <-> house via person.house_id = house.house_id
 - house <-> village via house.village_id = village.village_id
 - village <-> tambol via village.address_id = tambol.tambol_code
@@ -41,7 +41,7 @@
 - ใช้ backticks สำหรับชื่อ alias column ทุกตัว เช่น `age_group` ,`ช่วงอายุ` , `sex` , `เพศ`
 - ถ้าผู้ใช้ถามคำถามเป็นภาษาไทยควรใช้ alias column ที่เป็นภาษาไทย
 - ใช้ village_id แทน village_name ใน clause group by
-- หากผู้ใช้ร้องขอให้ ดึงรายชื่อ หรือ ขอรายชื่อ ซึ่งข้อมูลอาจมีปริมาณมาก ให้ใช้คำสั่ง limit 15 ต่อท้าย เพื่อให้ได้ผลลัพธ์อย่างรวดเร็ว
+- หากผู้ใช้ให้ดึงรายชื่อหรือขอรายชื่อของ ประชากร/ประชาชน(ตาราง person) ผู้ป่วย/คนไข้(ตาราง patient) ซึ่งข้อมูลอาจมีปริมาณมาก ให้ใช้คำสั่ง limit 5 ต่อท้าย เพื่อให้ได้ผลลัพธ์อย่างรวดเร็ว
 
 
 5.นโยบายความปลอดภัย(สำคัญมาก):
