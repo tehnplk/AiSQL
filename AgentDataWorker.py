@@ -12,6 +12,10 @@ from pydantic_ai.providers.openrouter import OpenRouterProvider
 
 from sandbox import read_db_config
 
+# import logfire
+# logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
+# logfire.instrument_pydantic_ai()
+
 
 class OutputType(BaseModel):
     sql: str = Field(
@@ -34,7 +38,7 @@ class AgentDataWorker(QThread):
 
         if llm_model == "openrouter/horizon-beta":
             llm_model = OpenAIModel(
-                model="openrouter/horizon-beta",
+                model_name="openrouter/horizon-beta",
                 provider=OpenRouterProvider(api_key=os.getenv("OPENROUTER_API_KEY")),
             )
 
@@ -46,10 +50,10 @@ class AgentDataWorker(QThread):
         system_prompt = open("sys_prompt.txt", "r", encoding="utf-8").read()
         self.agent = Agent(
             model=llm_model,
-            instrument=True,
-            output_type=OutputType,
-            # toolsets=[mcp_mysql],
             system_prompt=system_prompt,
+            instructions="คุณเป็นผู้หญิงที่เชี่ยวชาญด้านการเขียนคำสั่ง SQL",
+            output_type=OutputType,
+            toolsets=[mcp_mysql],
         )
 
         self.user_input = user_input

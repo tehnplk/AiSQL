@@ -78,9 +78,14 @@ class main(QMainWindow, main_ui):
                 self.chat_button.setText("Thinking...")
 
             selected_model = self.model_combo.currentText()
-            try:
+            if selected_model == "openrouter/horizon-beta":
+                llm_model = "openrouter/horizon-beta"
+            else:
                 llm_model = f"google-gla:{selected_model}"
 
+            print(f"Ai model: {llm_model}")
+
+            try:
                 self.agent_worker = AgentDataWorker(
                     llm_model, user_prompt, self.message_history
                 )
@@ -110,7 +115,7 @@ class main(QMainWindow, main_ui):
 
     def on_progress_update(self, message):
         self.statusbar.showMessage(message)
-        
+
     def on_message_history(self, message_history):
         """Handle message history update."""
         self.message_history = message_history
@@ -574,7 +579,7 @@ class main(QMainWindow, main_ui):
 
 
 if __name__ == "__main__":
-    print('Ai agent is running on background..')
+    print("Ai agent is running on background..")
     print(f"Don't close this terminal...")
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
