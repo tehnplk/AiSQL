@@ -1,8 +1,5 @@
 import os
 from PyQt6.QtCore import QThread, pyqtSignal
-from dotenv import load_dotenv
-
-load_dotenv()
 
 from pydantic_ai import Agent
 from pydantic import BaseModel, Field
@@ -13,6 +10,10 @@ from pydantic_ai.providers.openrouter import OpenRouterProvider
 from sandbox import read_db_config
 
 import asyncio
+
+from LoadEnv import load_env_for_pyinstaller
+
+load_env_for_pyinstaller()
 
 """
 import logfire
@@ -45,12 +46,26 @@ class AgentDataWorker(QThread):
                 provider=OpenRouterProvider(api_key=os.getenv("OPENROUTER_API_KEY")),
             )
 
+        try:
+            db_config = read_db_config()
+        except Exception as e:
+            print(f"agent sandbox error: {str(e)}")
+
+        #print(f"agent sandbox: \n{db_config}")
+
         mcp_mysql = MCPServerStdio(
             "uvx",
             ["--from", "mysql-mcp-server", "mysql_mcp_server"],
-            read_db_config(),
+            db_config,
         )
-        system_prompt = open("sys_prompt.txt", "r", encoding="utf-8").read()
+
+        try:
+            system_prompt = open("sys_prompt.txt", "r", encoding="utf-8").read()
+        except Exception as e:
+            print(f"agent system prompt error: {str(e)}")
+
+        #print(f"agent system prompt: \n{system_prompt}")
+
         self.agent = Agent(
             model=llm_model,
             system_prompt=system_prompt,
@@ -82,6 +97,7 @@ class AgentDataWorker(QThread):
             # Re-raise so run() catches it and logs
             # raise
             self.signal_error.emit(str(e))
+            print(f"Ai agent error : {str(e)}")
 
     def run(self):
         asyncio.run(self.chat())
