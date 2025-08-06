@@ -1,5 +1,7 @@
 from PyQt6.QtCore import QThread, pyqtSignal
 import pymysql
+
+
 class QueryExecutor(QThread):
     """Background thread for executing SQL queries."""
 
@@ -11,6 +13,16 @@ class QueryExecutor(QThread):
         super().__init__()
         self.sql_command = sql_command
         self.db_config = db_config
+
+        self.effect_keywords = [
+            "INSERT",
+            "UPDATE",
+            "DELETE",
+            "ALTER",
+            "CREATE",
+            "DROP",
+            "TRUNCATE",
+        ]
 
     def run(self):
         """Execute the SQL query in background."""
@@ -27,7 +39,20 @@ class QueryExecutor(QThread):
                 charset="utf8mb4",
             )
 
-            self.progress.emit("กำลังดำเนินการคิวรี...")
+            self.progress.emit("กำลังดำเนินการ...")
+            # check sql_command in effect_keywords
+            # do execute and commit only
+            if any(
+                keyword in self.sql_command.upper() for keyword in self.effect_keywords
+            ):
+                with connection.cursor() as cursor:
+                    cursor.execute(self.sql_command)
+                    connection.commit()
+                    #หาจำนวน effect rows
+                    effect_rows = cursor.rowcount
+                self.progress.emit(f"ปรับปรุงฐานข้อมูลสำเร็จ")
+                self.finished.emit([effect_rows], ["effect"])
+                return
 
             with connection.cursor() as cursor:
                 cursor.execute(self.sql_command)
@@ -41,7 +66,7 @@ class QueryExecutor(QThread):
             connection.close()
 
             if results:
-                self.progress.emit("สำเร็จ")
+                self.progress.emit("ดึงข้อมูลสำเร็จ")
                 self.finished.emit(results, columns)
             else:
                 self.finished.emit([], [])
