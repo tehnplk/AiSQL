@@ -274,6 +274,7 @@ class main(QMainWindow, main_ui):
         # Show error in a message box
         QMessageBox.critical(self, "Error", error_message)
         self.results_area.setModel(None)
+        self.statusbar.showMessage("")
 
     def setup_table_context_menu(self):
         """Setup context menu for table headers."""
