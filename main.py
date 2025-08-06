@@ -110,7 +110,7 @@ class main(QMainWindow, main_ui):
 
     def on_progress_update(self, message):
         self.statusbar.showMessage(message)
-
+        
     def on_message_history(self, message_history):
         """Handle message history update."""
         self.message_history = message_history
@@ -127,6 +127,7 @@ class main(QMainWindow, main_ui):
 
         # Format the SQL
         self.format_sql()
+        print(f"Ai ทำงาน...เสร็จสิ้น")
 
     def on_chat_error(self, error_message):
         """Handle chat error."""
@@ -136,6 +137,7 @@ class main(QMainWindow, main_ui):
             self.chat_button.setText("Chat")
 
         self._show_error(error_message)
+        print(f"Ai ทำงานผิดพลาด {error_message}")
 
     def run_query(self):
         """Execute SQL query using background thread and pandas model."""
