@@ -84,10 +84,6 @@ class AgentDataWorker(QThread):
                 else:
                     self.signal_finished.emit(result.output.answer)
 
-                print("Ai output :")
-                print(result.output.answer)
-                print(result.output.explanation)
-
         except Exception as e:
             # Re-raise so run() catches it and logs
             # raise
