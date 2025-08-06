@@ -1,11 +1,12 @@
-SELECT person_id,
-       pname AS `คำนำหน้า`,
-       fname AS `ชื่อ`,
-       lname AS `นามสกุล`,
-       CASE
-           WHEN sex = '1' THEN 'ชาย'
-           WHEN sex = '2' THEN 'หญิง'
-           ELSE NULL
-       END AS `เพศ`,
-       timestampdiff(YEAR, person.birthdate, curdate()) AS `อายุ`
-FROM person
+SELECT p.pname AS `คำนำหน้าชื่อ`,
+       p.fname AS `ชื่อ`,
+       p.lname AS `นามสกุล`,
+       o.vstdate AS `วันที่วินิจฉัย`,
+       i.name AS `ชื่อโรค`,
+       od.icd10 AS `รหัสโรค`
+FROM person p
+JOIN ovst o ON p.patient_hn = o.hn
+JOIN ovstdiag od ON o.vn = od.vn
+JOIN icd101 i ON od.icd10 = i.code
+WHERE od.icd10 = 'J00'
+    AND YEAR(o.vstdate) = 2024

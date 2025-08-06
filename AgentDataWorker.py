@@ -14,7 +14,7 @@ from sandbox import read_db_config
 
 import asyncio
 
-"""
+
 import logfire
 logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
 logfire.instrument_pydantic_ai()
@@ -24,13 +24,7 @@ logfire.instrument_pydantic_ai()
 class OutputType(BaseModel):
     sql: str = Field(
         description="The SQL query that agent used. If use alias name need to cover by `` and remove limit clause at end of command. If no sql return empty string"
-    )
-    csv: str = Field(
-        description="The result of the query in csv format. Implement for select command only. If no csv return empty string"
-    )
-    explanation: str = Field(
-        description="The explanation of the result Limit in 200 words. If no explanation return empty string"
-    )
+    )    
     answer: str = Field(
         description="The answer of the agent when user ask question not related to database. If no answer return empty string"
     )
