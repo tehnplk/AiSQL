@@ -3,7 +3,7 @@ from PyQt6.QtCore import QThread, pyqtSignal
 
 from pydantic_ai import Agent
 from pydantic import BaseModel, Field
-from pydantic_ai.mcp import MCPServerStreamableHTTP,MCPServerSSE
+from pydantic_ai.mcp import MCPServerStreamableHTTP, MCPServerSSE
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openrouter import OpenRouterProvider
 
@@ -80,8 +80,13 @@ class AgentDataWorker(QThread):
         except Exception as e:
             # Re-raise so run() catches it and logs
             # raise
-            self.signal_error.emit(str(e))
-            print(f"Ai agent run chat error : {str(e)}")
+            err_msg = f"""
+            Ai agent run chat error : {str(e)}
+            Check mcp server is running
+            {os.getenv("MCP_DB_SANDBOX")}
+            """
+            self.signal_error.emit(err_msg)
+            print(err_msg)
 
     def run(self):
         import traceback, logging, asyncio
