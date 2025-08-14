@@ -79,8 +79,8 @@ class main(main_ui):
                 self.chat_button.setText("Thinking...")
 
             selected_model = self.model_combo.currentText()
-            if selected_model == "openrouter/horizon-beta":
-                llm_model = "openrouter/horizon-beta"
+            if selected_model == "openai/gpt-oss-20b":
+                llm_model = "openai/gpt-oss-20b"
             else:
                 llm_model = f"google-gla:{selected_model}"
 

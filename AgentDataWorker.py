@@ -3,7 +3,7 @@ from PyQt6.QtCore import QThread, pyqtSignal
 
 from pydantic_ai import Agent
 from pydantic import BaseModel, Field
-from pydantic_ai.mcp import MCPServerStdio
+from pydantic_ai.mcp import MCPServerStreamableHTTP,MCPServerSSE
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openrouter import OpenRouterProvider
 
@@ -12,11 +12,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-"""
+
 import logfire
 logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
 logfire.instrument_pydantic_ai()
-"""
+
 
 sys_prompt = open("sys_prompt.txt", "r", encoding="utf-8").read()
 
@@ -39,24 +39,14 @@ class AgentDataWorker(QThread):
     def __init__(self, llm_model, user_input, message_history):
         super().__init__()
 
-        if llm_model == "openrouter/horizon-beta":
+        if llm_model == "openai/gpt-oss-20b":
             llm_model = OpenAIModel(
-                model_name="openrouter/horizon-beta",
+                model_name="openai/gpt-oss-20b",
                 provider=OpenRouterProvider(api_key=os.getenv("OPENROUTER_API_KEY")),
             )
 
         # ควรใช้ MCPServerSSE แทน MCPServerStdio เพื่อหลีกเลี่ยง error TaskGroup
-        self.mcp_mysql = MCPServerStdio(
-            "uvx",
-            ["--from", "mysql-mcp-server", "mysql_mcp_server"],
-            {
-                "MYSQL_HOST": os.getenv("SANDBOX_HOST"),
-                "MYSQL_PORT": os.getenv("SANDBOX_PORT"),
-                "MYSQL_USER": os.getenv("SANDBOX_USER"),
-                "MYSQL_PASSWORD": os.getenv("SANDBOX_PASSWORD"),
-                "MYSQL_DATABASE": os.getenv("SANDBOX_DATABASE"),
-            },
-        )
+        self.mcp_mysql = MCPServerSSE(url=os.getenv("MCP_DB_SANDBOX"))
 
         self.agent = Agent(
             model=llm_model,
