@@ -71,6 +71,7 @@ class main(main_ui):
             self.pandas_model = None
             self.results_area.setModel(None)
             self.sql_editor.setPlainText("Ai is thinking...")
+            self.statusbar.showMessage("Ai is thinking...")
             
             
 
