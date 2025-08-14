@@ -12,11 +12,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-
+"""
 import logfire
 logfire.configure(token=os.getenv("LOGFIRE_TOKEN"))
 logfire.instrument_pydantic_ai()
-
+"""
 
 sys_prompt = open("sys_prompt.txt", "r", encoding="utf-8").read()
 
