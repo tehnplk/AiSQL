@@ -9,6 +9,7 @@ from PyQt6.QtCore import (
 from PyQt6.QtGui import (
     QStandardItemModel,
     QStandardItem,
+    QIcon,
 )
 from main_ui import main_ui
 
@@ -594,6 +595,7 @@ if __name__ == "__main__":
     print(f"Do not close this terminal...")
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
+    app.setWindowIcon(QIcon("ico.ico"))
     win = main()
     win.show()
     sys.exit(app.exec())
