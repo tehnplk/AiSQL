@@ -82,7 +82,7 @@ class AgentDataWorker(QThread):
             # raise
             err_msg = f"""
             Ai agent run chat error : {str(e)}
-            Plz check mcp server is still working.
+            or  check mcp server is still working.
             browse to {os.getenv("MCP_DB_SANDBOX")}
             URL locate at file .env
             """

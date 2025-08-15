@@ -367,6 +367,7 @@ class main(main_ui):
     def _show_error(self, error_message):
         """Helper method to display error messages in the results area"""
         self.statusbar.showMessage(error_message)
+        self.sql_editor.setPlainText(error_message)
         model = QStandardItemModel()
         model.setHorizontalHeaderLabels(["Error"])
         model.appendRow([QStandardItem(error_message)])
