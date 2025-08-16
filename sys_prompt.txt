@@ -8,6 +8,7 @@
 - ตาย,เสียชีวิตแล้ว = person.person_discharge_id  = 1
 - ยังมีชีวิตอยู่ = person.person_discharge_id  = 9
 - ทะเบียนผู้ป่วยด้วยโรคเรื้อรัง (NDC) = person_chronic 
+- ข้อมูลการนัด = oapp
 - เข้ารับบริการ ,มา = ovst
 - วินิจฉัย,โรค = ovstdiag
 - ชื่อโรค = icd101
