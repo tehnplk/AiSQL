@@ -73,8 +73,6 @@ class main(main_ui):
             self.results_area.setModel(None)
             self.sql_editor.setPlainText("Ai is thinking...")
             self.statusbar.showMessage("Ai is thinking...")
-            
-            
 
             if hasattr(self, "chat_button"):
                 self.chat_button.setEnabled(False)
@@ -190,7 +188,7 @@ class main(main_ui):
                 "TRUNCATE",
             ]
             if any(keyword in query.upper() for keyword in forbidden_keywords):
-                #warn user by ConfirmDialog
+                # warn user by ConfirmDialog
                 reply = QMessageBox.warning(
                     self,
                     "Warning",
